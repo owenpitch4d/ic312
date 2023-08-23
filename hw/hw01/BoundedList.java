@@ -12,9 +12,9 @@ public class BoundedList<T> implements List<T> {
   /** Create a new BoundedList with the given maximum capacity.
    */
   public BoundedList(int capacity) {
-    if(capacity < 1) { 
+    /*if(capacity < 1) { //make sure list startng size is greater than 0 
       throw new IllegalArgumentException("Invalid Starting List Size"); 
-    } 
+    }*/ 
 
     @SuppressWarnings("unchecked")
     T[] elements = (T[]) new Object[capacity];
@@ -64,11 +64,12 @@ public class BoundedList<T> implements List<T> {
   @Override
   public void remove(int index) throws IndexOutOfBoundsException {
     if(index >= 0 && index < size) {
-      for(int i = index; i < size - 1; i++ ) {  //shift to left
-        elements[i] = elements[i + 1]; //last iteration moves null char into final element pos
+      //shift elements to left
+      for(int i = index; i < size - 1; i++ ) { 
+        //last iteration moves null char into final element pos
+        elements[i] = elements[i + 1]; 
       }
       size--;
-      //elements[size] = null;
     } else {
       throw new IndexOutOfBoundsException("Invalid index " + index);
     }
@@ -77,15 +78,8 @@ public class BoundedList<T> implements List<T> {
 
   @Override
   public int size() {
-    /*int cnt = 1;
-    for(int i = 0; i < capacity; i++) {
-      if(elements[i] != null) { cnt++; }
-    }
-
-    return cnt;*/
     return size;
   }
-    //throw new UnsupportedOperationException("DELETE THIS!");
 
   @Override
   // this produces a string like "[ 1 2 3 4 ]"
@@ -120,7 +114,7 @@ public class BoundedList<T> implements List<T> {
     //System.out.println(lst.size());
     lst.add(0, 5);   // [ 5 2 3 1 4 ]
     System.out.println(lst);
-    lst.remove(1);
+    lst.remove(2);
     System.out.println(lst);
   }
 }
