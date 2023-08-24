@@ -1,17 +1,22 @@
+//Owen Pitchford
+//255076
+
+import java.util.Iterator;
 /** A List implementation with fixed, bounded capacity.
  *
  * When an instance of this class is constructed, the chosen capacity
  * represents the maximum size the list can ever grow to.
  */
-public class BoundedList<T> implements List<T> {
+public class BoundedList<T> implements List<T>, Iterable<T>{
   private T[] elements;
   private int capacity;
   private int size;
-  // TODO you might want another private field...
 
   /** Create a new BoundedList with the given maximum capacity.
    */
   public BoundedList(int capacity) {
+    /*This is what I added to test the starting size but it failed the
+    submit tests*/
     /*if(capacity < 1) { //make sure list startng size is greater than 0 
       throw new IllegalArgumentException("Invalid Starting List Size"); 
     }*/ 
@@ -26,8 +31,7 @@ public class BoundedList<T> implements List<T> {
 
   @Override
   public T get(int index) throws IndexOutOfBoundsException {
-    //throw new UnsupportedOperationException("DELETE THIS!");
-    if(index >= 0 && index < size) {
+    if(index >= 0 && index < size) { //check for valid index
       return elements[index];
     } else {
       throw new IndexOutOfBoundsException("Invalid index " + index );
@@ -36,8 +40,7 @@ public class BoundedList<T> implements List<T> {
 
   @Override
   public void set(int index, T data) throws IndexOutOfBoundsException {
-    //throw new UnsupportedOperationException("DELETE THIS!");
-    if(index >= 0 && index < size) {
+    if(index >= 0 && index < size) { //check for valid index
       elements[index] = data;
     } else {
       throw new IndexOutOfBoundsException("Invalid index " + index);
@@ -58,7 +61,6 @@ public class BoundedList<T> implements List<T> {
     } else {
       throw new IllegalStateException();
     }
-    //throw new UnsupportedOperationException("DELETE THIS!");
   }
 
   @Override
@@ -66,20 +68,16 @@ public class BoundedList<T> implements List<T> {
     if(index >= 0 && index < size) {
       //shift elements to left
       for(int i = index; i < size - 1; i++ ) { 
-        //last iteration moves null char into final element pos
         elements[i] = elements[i + 1]; 
       }
       size--;
     } else {
       throw new IndexOutOfBoundsException("Invalid index " + index);
     }
-    //throw new UnsupportedOperationException("DELETE THIS!");
   }
 
   @Override
-  public int size() {
-    return size;
-  }
+  public int size() { return size; }
 
   @Override
   // this produces a string like "[ 1 2 3 4 ]"
@@ -92,6 +90,33 @@ public class BoundedList<T> implements List<T> {
     }
     sb.append(']');
     return sb.toString();
+  }
+
+  public BoundedListIter iterator() { return new BoundedListIter(); }
+
+  /**
+   * Iterator class
+   */
+  public class BoundedListIter implements Iterator<T> {
+    private int currentIndex;
+
+    public BoundedListIter() { currentIndex = 0; }
+    
+    @Override
+    public boolean hasNext() { return currentIndex < size; }
+
+    @Override
+    public T next() {
+      if(!hasNext()) {
+        throw new IllegalStateException("No more elements in the list!");
+      }
+
+      return get(currentIndex++);
+    }
+
+    @Override
+    public void remove() { throw new UnsupportedOperationException(); }
+
   }
 
   /**
