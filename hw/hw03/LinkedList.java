@@ -4,10 +4,13 @@
 import java.util.NoSuchElementException;
 
 public class LinkedList<T> implements List<T> {
-  // TODO your private inner classes and fields...
   private Node head;
   private int size;
 
+  /**
+   * Function to check that index is valid
+   * @param index int for index that user inputs
+   */
   private void validIndexCheck(int index) {
     if(index < 0 || index >= size) {
       throw new IndexOutOfBoundsException("Invalid Index: " + index);
@@ -20,14 +23,15 @@ public class LinkedList<T> implements List<T> {
     return get(index, head);
   }
 
+  /**
+   * get() helper method
+   * @param index
+   * @param curr
+   * @return
+   */
   private T get(int index, Node curr) {
     if(index == 0) { return curr.data; }
     else { return get(index - 1, curr.next); }
-
-    /*
-     *if(index > 0) { get(index-1, curr.next); }
-      return curr.data; 
-     */
   }
 
   @Override
@@ -36,6 +40,12 @@ public class LinkedList<T> implements List<T> {
     set(index, data, head);
   }
 
+  /**
+   * Set helper method
+   * @param index
+   * @param data
+   * @param curr
+   */
   private void set(int index, T data, Node curr) {
     if(index == 0) { curr.data = data; } 
     else { set(index - 1, data, curr.next); }
@@ -46,57 +56,83 @@ public class LinkedList<T> implements List<T> {
     if(index < 0 || index > size) { 
       throw new IndexOutOfBoundsException("Invalid Index: " + index);}
 
-    if(head == null) {
+    if(head == null) { //empty list
       head = new Node(data, null);
       size++;
       return;
-    } else if(index == size) {
-      head.next = new Node(data, null);
-      size++;
     }
 
-    add(index, data, head);
+    if(index == 0) { //add to front
+      Node newNode = new Node(data, head);
+      head = newNode;
+      size++;
+      return;
+    }
+    add(index, data, head, null);
   }
 
-  private void add(int index, T data, Node curr) {
-    if(index == 0) {
-      Node newNode = new Node(data, null);
-      curr = newNode.next;
+  private void add(int index, T data, Node curr, Node prev) {
+    if(index == 0) {  //base case
+      Node newNode = new Node(data, curr);
+      prev.next = newNode;
       size++;
-      //return newNode;
-    } else if(index == 1) {
-      //curr.next = newNode;
-    } 
-    else {
-      add(index - 1, data, curr.next);
-      //return curr;
+    } else if(curr.next == null) {//add to back
+      Node newNode = new Node(data, null);
+      curr.next = newNode;
+      size++;
+    } else { 
+      add(index - 1, data, curr.next, curr);
     }
   }
 
   @Override
   public void remove(int index) throws IndexOutOfBoundsException {
     validIndexCheck(index);
+    if (index == 0) { //remove first element
+      head = head.next;
+      size--;
+      return;
+    }
     remove(index, head);
   }
 
   private void remove(int index, Node curr) {
-    if(index == 1) {
+    if(curr == null) { return; }
+    if(index == 1) { //middle index
       curr.next = curr.next.next;
+      size--;
+    } else if(curr.next == null) {//remove the last element
+      curr = null;
     } else {
       remove(index - 1, curr.next);
     }
   }
 
   @Override
-  public int size() {
-    return size;
-  }
+  public int size() { return size; }
 
   /** Removes ALL elements matching the given one using .equals().
    *
    * @param element The element that should be removed
    */
   public void removeAll(T element) {
+    removeAll(0, element, head);
+  }
+
+  /**
+   * removeAll() helper function
+   * @param index index of list
+   * @param element key to delete
+   * @param curr Node to keep track of current node
+   */
+  private void removeAll(int index, T element, Node curr) {
+    if(curr == null ) { return; } //made it to the end of the list
+    else if(curr.data.equals(element)) { //find node that contains the key
+      remove(index);
+      removeAll(0, element, head); //start from beginning
+    } else {
+      removeAll(index + 1, element, curr.next);
+    }
   }
 
   /** Gets the 2nd-to-last element.
@@ -109,6 +145,7 @@ public class LinkedList<T> implements List<T> {
     return get(size-2);
   }
 
+  //Node class
   private class Node {
     public T data;
     public Node next;
@@ -119,14 +156,54 @@ public class LinkedList<T> implements List<T> {
     }
   }
 
+  /**
+   * Simple print to visualize linked list
+   */
+  public void print() {
+    Node temp = head;
+    while(temp != null) {
+      System.out.print(temp.data + " --> ");
+      temp=temp.next;
+    }
+    System.out.println("null");
+    System.out.println();
+  }
+
+  /**
+   * Main used for testing
+   */
   public static void main(String[] args) {
     LinkedList<Integer> list = new LinkedList<>();
-    list.add(0,5);
-    list.add(1, 9);
-    //list.add(1, 2);
+    list.add(0,1);
+    list.print();
+    list.set(0, 3);
+    list.print();
+    /*list.add(0,0);
+    list.add(1, 1);
+    list.add(2, 2);
+    list.add(3,3);
+    list.add(2, 500);
+    list.add(5, 2);
+    list.add(0, 2);
+    list.print();
+    //list.remove(0);
+    //list.print();
+    //list.remove(3);
+    //list.print();
+    //list.remove(list.size() - 1 );
+    //list.add(2, 2);
+    list.removeAll(2);
+    list.print();
+    //list.remove(0);
+    //list.print();
+    //list.remove(list.size()-1);
+    //list.print();
     System.out.println(list.get(0));
-    //System.out.println(list.get(1));
-    System.out.println(list.size());
+    System.out.println(list.get(1));
+    System.out.println(list.get(2));
+    //System.out.println(list.get(3));
+    //System.out.println(list.penultimate());
+    System.out.println(list.size());*/
 
   }
 }
