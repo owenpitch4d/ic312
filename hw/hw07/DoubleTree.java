@@ -1,10 +1,8 @@
+//Owen Pitchford 
 import java.util.NoSuchElementException;
 
-//Owen Pitchford 
-
 public class DoubleTree implements AddMax {
-  public Node root = null;
-  public int balanceFactor, rbf;
+  private Node root = null;
 
   private class Node {
     public double key;
@@ -18,19 +16,13 @@ public class DoubleTree implements AddMax {
       this.right = null;
       this.height = 0;
     }
-
-  }
-
-  public int rootHeight() {
-    return root.height;
   }
 
   private int height(Node curr) { 
     if(curr == null) {
       return -1;
-    } else {
-      return curr.height; 
     }
+    return curr.height; 
   }
 
   private void updateHeight(Node curr) {
@@ -48,44 +40,48 @@ public class DoubleTree implements AddMax {
   @Override
   public void add(double x) {
     root = add(root, x);
-    balance();
   }
 
-  private void balance() {
-    
-    balanceFactor = balanceFactor(root);
+  private Node balance(Node curr) {
+    int balanceFactor = balanceFactor(curr);
     
     if(balanceFactor == -2) { //tree is right heavy
-      if(balanceFactor(root.right) == 1) {
-        root.right = rightRotate(root.right);
-        //updateHeight(root.right);
-      }
-      root = leftRotate(root);
-      //updateHeight(root);
+      return rightHeavyBalance(curr);
     }
+    if (balanceFactor == 2) { //tree is left heavy
+      return leftHeavyBalance(curr);
+    }
+    return curr;
+  }
 
-    if (balanceFactor == 2) {
-      if(balanceFactor(root.left) == -1) {
-        root.left = leftRotate(root.left);
-        //updateHeight(root.left);
-      }
-      root = rightRotate(root);
-      //updateHeight(root);
+  private Node leftHeavyBalance(Node curr) {
+    if(balanceFactor(curr.left) == -1) { //check if double rotation needed
+      curr.left = leftRotate(curr.left);
     }
-    
+    return rightRotate(curr);
+  }
+
+  private Node rightHeavyBalance(Node curr) {
+    if(balanceFactor(curr.right) == 1) { //check if double rotation needed
+      curr.right = rightRotate(curr.right);
+    }
+    return leftRotate(curr);
+
   }
 
   private Node add(Node curr, double key) {
     if(curr == null) { return new Node(key); }
-    if(key < curr.key) {
+    
+    if(key < curr.key) { //traverse through tree
       curr.left = add(curr.left, key);
     } else if(key > curr.key) {
       curr.right = add(curr.right, key);
+    } else {
+      return curr;
     }
 
-    updateHeight(curr);
-    
-    return curr;
+    updateHeight(curr); //update height of each node
+    return balance(curr); //balance the tree
   }
 
   private Node leftRotate(Node oldRoot) {
@@ -94,14 +90,10 @@ public class DoubleTree implements AddMax {
     newRoot.left = oldRoot;
     oldRoot.right = middle;
 
+    //update height of left subtree and root. right subtree will stay the same
     updateHeight(newRoot.left);
     updateHeight(newRoot);
     return newRoot;
-  }
-
-  private Node leftRightRotate(Node oldRoot) {
-    oldRoot.left = leftRotate(oldRoot.left);
-    return rightRotate(oldRoot);
   }
 
   private Node rightRotate(Node oldRoot) {
@@ -110,22 +102,44 @@ public class DoubleTree implements AddMax {
     newRoot.right = oldRoot;
     oldRoot.left = middle;
 
+    //update height of right subtree and root. left subtree will stay the same
     updateHeight(newRoot.right);
     updateHeight(newRoot);
     return newRoot;
   }
 
-  private Node rightLeftRotate(Node oldRoot) {
-    oldRoot.right = rightRotate(oldRoot.right);
-    return leftRotate(oldRoot);
-  }
-
-
   @Override
   public double removeMax() throws NoSuchElementException {
-    return 0;
+    if(root == null) {
+      throw new NoSuchElementException();
+    }
+
+    Node temp = root;
+    //traverse right subtrees to get max value to return
+    while(temp.right != null) { temp = temp.right; }
+    double max = temp.key;
+    root = removeMax(root); //update tree    
+    return max;
   }
 
+  private Node removeMax(Node curr) {
+    //traverse to right most node
+    if(curr.right == null) {
+      return curr.left;
+    }
+    curr.right = removeMax(curr.right);
+
+    //update height and rebalance tree
+    updateHeight(curr);
+    int balanceFactor = balanceFactor(curr);
+    if (balanceFactor == 2) {
+      return leftHeavyBalance(curr);
+    }
+
+    return curr;
+  }
+
+  //Main used for testing
   public static void main(String[] args) {
     DoubleTree tree = new DoubleTree();
     tree.add(10);
@@ -145,14 +159,5 @@ public class DoubleTree implements AddMax {
     System.out.print(tree.root.right.key + " ");
     System.out.println(tree.root.right.height);
     System.out.println(tree.root.right.right.key);
-
-
-
-    
-    /*tree.add(18);
-    System.out.println(tree.rootHeight());
-    tree.add(12);
-    tree.add(11);
-    //tree.add(14);*/
   }
 }
